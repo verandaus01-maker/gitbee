@@ -619,6 +619,16 @@
                 </div>
             </div>
 
+            <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem; align-items: center; justify-content: center;">
+                <div style="text-align: center;">
+                    <label for="logoInput" style="display: inline-block; padding: 0.75rem 1.5rem; background: linear-gradient(135deg, #F59E0B, #D97706); color: white; border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 0.875rem; transition: all 0.3s;">
+                        🏷️ Add Your Logo (Optional)
+                    </label>
+                    <input type="file" id="logoInput" accept="image/*" style="display: none;">
+                    <div id="logoPreview" style="margin-top: 0.5rem; font-size: 0.75rem; color: #6B7280;"></div>
+                </div>
+            </div>
+
             <input type="file" id="fileInput" accept="image/*" style="display: none;">
             <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
                 <div class="upload-icon">📸</div>
@@ -713,6 +723,7 @@
         let enhancedImage = null;
         let detectedType = null;
         let detectedIndustry = null;
+        let userLogo = null; // Store user's uploaded logo
 
         // Canvas contexts
         let canvasBeforeCtx, canvasAfterCtx;
@@ -726,8 +737,10 @@
         function setupEventListeners() {
             const fileInput = document.getElementById('fileInput');
             const uploadArea = document.getElementById('uploadArea');
+            const logoInput = document.getElementById('logoInput');
 
             fileInput.addEventListener('change', handleFileSelect);
+            logoInput.addEventListener('change', handleLogoSelect);
 
             uploadArea.addEventListener('dragover', (e) => {
                 e.preventDefault();
@@ -748,6 +761,28 @@
                     handleFileUpload(e.dataTransfer.files[0]);
                 }
             });
+        }
+
+        function handleLogoSelect(e) {
+            if (e.target.files.length > 0) {
+                const file = e.target.files[0];
+                if (!file.type.startsWith('image/')) {
+                    showNotification('Please upload an image file for logo', 'error');
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        userLogo = img;
+                        document.getElementById('logoPreview').textContent = '✓ Logo ready: ' + file.name;
+                        showNotification('Logo uploaded! It will appear on your enhanced image', 'success');
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
         }
 
         function handleFileSelect(e) {
@@ -911,7 +946,44 @@
             // Step 3: Professional-grade finishing
             applyProFinishing(ctx, width, height);
 
+            // Step 4: Add logo overlay if user uploaded one
+            if (userLogo) {
+                applyLogoOverlay(ctx, width, height);
+            }
+
             enhancedImage = canvas;
+        }
+
+        function applyLogoOverlay(ctx, width, height) {
+            // Smart logo positioning - bottom right corner
+            const maxLogoWidth = width * 0.25; // Logo max 25% of image width
+            const maxLogoHeight = height * 0.15; // Logo max 15% of image height
+
+            let logoWidth = userLogo.width;
+            let logoHeight = userLogo.height;
+
+            // Scale logo proportionally
+            const scale = Math.min(maxLogoWidth / logoWidth, maxLogoHeight / logoHeight, 1);
+            logoWidth *= scale;
+            logoHeight *= scale;
+
+            // Position in bottom right with padding
+            const padding = Math.min(width, height) * 0.05;
+            const x = width - logoWidth - padding;
+            const y = height - logoHeight - padding;
+
+            // Add subtle shadow for visibility
+            ctx.save();
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
+            ctx.shadowBlur = 10;
+            ctx.shadowOffsetX = 2;
+            ctx.shadowOffsetY = 2;
+
+            // Draw logo with slight transparency for subtle branding
+            ctx.globalAlpha = 0.85;
+            ctx.drawImage(userLogo, x, y, logoWidth, logoHeight);
+
+            ctx.restore();
         }
 
         function generateStunningBackground(ctx, width, height) {
