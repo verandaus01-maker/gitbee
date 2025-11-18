@@ -916,23 +916,25 @@
 
         function generateStunningBackground(ctx, width, height) {
             if (detectedIndustry === 'restaurant') {
-                // Stunning restaurant background
-                const gradient = ctx.createRadialGradient(width*0.7, height*0.3, 0, width*0.7, height*0.3, width);
-                gradient.addColorStop(0, '#3E2723');
-                gradient.addColorStop(0.5, '#2C1810');
-                gradient.addColorStop(1, '#1A0E0A');
+                // DRAMATIC restaurant background - Super obvious!
+                const gradient = ctx.createRadialGradient(width*0.6, height*0.4, 0, width*0.6, height*0.4, width*1.2);
+                gradient.addColorStop(0, '#4A2C2A'); // Warmer brown
+                gradient.addColorStop(0.4, '#2C1810');
+                gradient.addColorStop(1, '#0D0907'); // Almost black
                 ctx.fillStyle = gradient;
                 ctx.fillRect(0, 0, width, height);
 
-                // Dramatic bokeh
-                ctx.globalAlpha = 0.4;
-                for(let i = 0; i < 60; i++) {
+                // HUGE DRAMATIC BOKEH LIGHTS
+                ctx.globalAlpha = 0.6; // More visible
+                for(let i = 0; i < 80; i++) { // More lights
                     const x = Math.random() * width;
                     const y = Math.random() * height;
-                    const r = Math.random() * 60 + 25;
+                    const r = Math.random() * 80 + 40; // Bigger
                     const grd = ctx.createRadialGradient(x, y, 0, x, y, r);
-                    grd.addColorStop(0, '#FFD700');
-                    grd.addColorStop(0.3, '#FFA500');
+                    const colors = ['#FFD700', '#FFA500', '#FF8C00', '#FFE4B5'];
+                    const color = colors[Math.floor(Math.random() * colors.length)];
+                    grd.addColorStop(0, color);
+                    grd.addColorStop(0.4, color + 'CC');
                     grd.addColorStop(1, 'transparent');
                     ctx.fillStyle = grd;
                     ctx.beginPath();
@@ -941,102 +943,106 @@
                 }
                 ctx.globalAlpha = 1;
 
-                // Add depth with gradient overlay
+                // Strong depth overlay
                 const depthGrad = ctx.createLinearGradient(0, 0, 0, height);
-                depthGrad.addColorStop(0, 'rgba(0,0,0,0.3)');
+                depthGrad.addColorStop(0, 'rgba(0,0,0,0.4)');
                 depthGrad.addColorStop(0.5, 'transparent');
-                depthGrad.addColorStop(1, 'rgba(0,0,0,0.5)');
+                depthGrad.addColorStop(1, 'rgba(0,0,0,0.6)');
                 ctx.fillStyle = depthGrad;
                 ctx.fillRect(0, 0, width, height);
 
             } else if (detectedIndustry === 'gym') {
-                // Energy-packed gym background
+                // EXTREME energy gym background
                 const gradient = ctx.createLinearGradient(0, 0, width, height);
-                gradient.addColorStop(0, '#0D0D1F');
+                gradient.addColorStop(0, '#0A0A1A');
                 gradient.addColorStop(0.5, '#1A1A3E');
-                gradient.addColorStop(1, '#0A0A14');
+                gradient.addColorStop(1, '#050508');
                 ctx.fillStyle = gradient;
                 ctx.fillRect(0, 0, width, height);
 
-                // Dynamic energy effects
-                ctx.globalAlpha = 0.3;
-                for(let i = 0; i < 20; i++) {
+                // INTENSE energy lines
+                ctx.globalAlpha = 0.5; // More visible
+                for(let i = 0; i < 30; i++) { // More lines
                     ctx.strokeStyle = i % 2 === 0 ? '#E94560' : '#00D9FF';
-                    ctx.lineWidth = 4;
+                    ctx.lineWidth = 6; // Thicker
                     ctx.beginPath();
                     const startX = Math.random() * width;
                     const startY = Math.random() * height;
-                    const endX = startX + (Math.random() - 0.5) * 200;
-                    const endY = startY + (Math.random() - 0.5) * 200;
+                    const endX = startX + (Math.random() - 0.5) * 300;
+                    const endY = startY + (Math.random() - 0.5) * 300;
                     ctx.moveTo(startX, startY);
                     ctx.lineTo(endX, endY);
                     ctx.stroke();
                 }
                 ctx.globalAlpha = 1;
 
-                // Glow effect
-                const glow = ctx.createRadialGradient(width*0.5, height*0.5, 0, width*0.5, height*0.5, width*0.8);
-                glow.addColorStop(0, 'rgba(233, 69, 96, 0.3)');
-                glow.addColorStop(0.5, 'rgba(0, 217, 255, 0.2)');
+                // STRONG glow effect
+                const glow = ctx.createRadialGradient(width*0.5, height*0.5, 0, width*0.5, height*0.5, width);
+                glow.addColorStop(0, 'rgba(233, 69, 96, 0.5)'); // More intense
+                glow.addColorStop(0.5, 'rgba(0, 217, 255, 0.3)');
                 glow.addColorStop(1, 'transparent');
                 ctx.fillStyle = glow;
                 ctx.fillRect(0, 0, width, height);
 
             } else {
-                // Professional studio background
-                const gradient = ctx.createRadialGradient(width/2, height*0.3, 0, width/2, height/2, width);
+                // CLEAN professional studio background - Very different from original
+                const gradient = ctx.createRadialGradient(width/2, height*0.3, 0, width/2, height/2, width*1.2);
                 gradient.addColorStop(0, '#FFFFFF');
-                gradient.addColorStop(0.6, '#F5F5F5');
-                gradient.addColorStop(1, '#D0D0D0');
+                gradient.addColorStop(0.5, '#F8F8F8');
+                gradient.addColorStop(1, '#C8C8C8'); // Darker edge
                 ctx.fillStyle = gradient;
                 ctx.fillRect(0, 0, width, height);
 
-                // Subtle texture
-                ctx.globalAlpha = 0.05;
-                for(let i = 0; i < 1000; i++) {
+                // More obvious texture
+                ctx.globalAlpha = 0.08;
+                for(let i = 0; i < 1500; i++) {
                     ctx.fillStyle = Math.random() > 0.5 ? '#000' : '#FFF';
-                    ctx.fillRect(Math.random() * width, Math.random() * height, 2, 2);
+                    const size = Math.random() * 3;
+                    ctx.fillRect(Math.random() * width, Math.random() * height, size, size);
                 }
                 ctx.globalAlpha = 1;
             }
         }
 
         function createAdvancedMask(ctx, width, height) {
-            // ADVANCED edge-aware masking
+            // AGGRESSIVE BACKGROUND REMOVAL - Actually removes background!
             const maskCanvas = document.createElement('canvas');
             maskCanvas.width = width;
             maskCanvas.height = height;
             const maskCtx = maskCanvas.getContext('2d');
 
-            // Black base
+            // Start with black (no subject)
             maskCtx.fillStyle = 'black';
             maskCtx.fillRect(0, 0, width, height);
 
-            // Multi-layer gradient mask for realistic isolation
+            // Create AGGRESSIVE circular mask that actually cuts out background
             const centerX = width / 2;
             const centerY = height / 2;
-            const baseRadius = Math.min(width, height) * 0.42;
 
-            // Primary mask
-            const gradient1 = maskCtx.createRadialGradient(
-                centerX, centerY, baseRadius * 0.5,
-                centerX, centerY, baseRadius * 1.5
+            // Much smaller radius for aggressive removal
+            const subjectRadius = Math.min(width, height) * 0.30; // Reduced from 0.42
+            const featherRadius = Math.min(width, height) * 0.38; // Tight feather
+
+            // Sharp gradient for dramatic cutout
+            const gradient = maskCtx.createRadialGradient(
+                centerX, centerY, subjectRadius,
+                centerX, centerY, featherRadius
             );
-            gradient1.addColorStop(0, 'white');
-            gradient1.addColorStop(0.4, 'white');
-            gradient1.addColorStop(0.65, 'rgba(255,255,255,0.8)');
-            gradient1.addColorStop(0.85, 'rgba(255,255,255,0.4)');
-            gradient1.addColorStop(1, 'transparent');
-            maskCtx.fillStyle = gradient1;
+            gradient.addColorStop(0, 'white');      // Full opacity in center
+            gradient.addColorStop(0.7, 'white');    // Stay sharp
+            gradient.addColorStop(0.95, 'rgba(255,255,255,0.3)'); // Quick falloff
+            gradient.addColorStop(1, 'transparent'); // Fully transparent at edge
+
+            maskCtx.fillStyle = gradient;
             maskCtx.fillRect(0, 0, width, height);
 
-            // Apply enhanced subject
+            // Apply enhanced subject with STRONG enhancements
             ctx.save();
-            ctx.filter = 'brightness(120%) contrast(115%) saturate(130%)';
+            ctx.filter = 'brightness(125%) contrast(120%) saturate(140%)';
             ctx.drawImage(originalImage, 0, 0, width, height);
             ctx.filter = 'none';
 
-            // Apply mask
+            // Apply mask to ACTUALLY CUT OUT the background
             ctx.globalCompositeOperation = 'destination-in';
             ctx.drawImage(maskCanvas, 0, 0);
             ctx.globalCompositeOperation = 'source-over';
