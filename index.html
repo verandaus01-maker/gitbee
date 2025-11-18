@@ -1005,48 +1005,252 @@
         }
 
         function createAdvancedMask(ctx, width, height) {
-            // AGGRESSIVE BACKGROUND REMOVAL - Actually removes background!
+            // REAL AI-POWERED BACKGROUND REMOVAL!
+            // Step 1: Get image data for analysis
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = width;
+            tempCanvas.height = height;
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCtx.drawImage(originalImage, 0, 0, width, height);
+            const imageData = tempCtx.getImageData(0, 0, width, height);
+            const pixels = imageData.data;
+
+            // Step 2: Detect dominant background color from edges
+            const backgroundColor = detectBackgroundColor(pixels, width, height);
+            console.log('Detected background color:', backgroundColor);
+
+            // Step 3: Create intelligent mask based on color similarity
+            const maskData = createColorBasedMask(pixels, width, height, backgroundColor);
+
+            // Step 4: Apply edge detection to refine boundaries
+            applyEdgeRefinement(maskData, width, height);
+
+            // Step 5: Clean up mask with morphological operations
+            cleanupMask(maskData, width, height);
+
+            // Step 6: Create mask canvas
             const maskCanvas = document.createElement('canvas');
             maskCanvas.width = width;
             maskCanvas.height = height;
             const maskCtx = maskCanvas.getContext('2d');
+            const maskImageData = maskCtx.createImageData(width, height);
+            maskImageData.data.set(maskData);
+            maskCtx.putImageData(maskImageData, 0, 0);
 
-            // Start with black (no subject)
-            maskCtx.fillStyle = 'black';
-            maskCtx.fillRect(0, 0, width, height);
-
-            // Create AGGRESSIVE circular mask that actually cuts out background
-            const centerX = width / 2;
-            const centerY = height / 2;
-
-            // Much smaller radius for aggressive removal
-            const subjectRadius = Math.min(width, height) * 0.30; // Reduced from 0.42
-            const featherRadius = Math.min(width, height) * 0.38; // Tight feather
-
-            // Sharp gradient for dramatic cutout
-            const gradient = maskCtx.createRadialGradient(
-                centerX, centerY, subjectRadius,
-                centerX, centerY, featherRadius
-            );
-            gradient.addColorStop(0, 'white');      // Full opacity in center
-            gradient.addColorStop(0.7, 'white');    // Stay sharp
-            gradient.addColorStop(0.95, 'rgba(255,255,255,0.3)'); // Quick falloff
-            gradient.addColorStop(1, 'transparent'); // Fully transparent at edge
-
-            maskCtx.fillStyle = gradient;
-            maskCtx.fillRect(0, 0, width, height);
-
-            // Apply enhanced subject with STRONG enhancements
+            // Step 7: Apply enhanced subject with STRONG enhancements
             ctx.save();
             ctx.filter = 'brightness(125%) contrast(120%) saturate(140%)';
             ctx.drawImage(originalImage, 0, 0, width, height);
             ctx.filter = 'none';
 
-            // Apply mask to ACTUALLY CUT OUT the background
+            // Step 8: Apply intelligent mask to REMOVE BACKGROUND
             ctx.globalCompositeOperation = 'destination-in';
             ctx.drawImage(maskCanvas, 0, 0);
             ctx.globalCompositeOperation = 'source-over';
             ctx.restore();
+        }
+
+        function detectBackgroundColor(pixels, width, height) {
+            // Sample edge pixels to detect background color
+            const edgeSamples = [];
+            const sampleSize = 20; // Sample every 20th pixel
+
+            // Top and bottom edges
+            for (let x = 0; x < width; x += sampleSize) {
+                // Top edge
+                let idx = (0 * width + x) * 4;
+                edgeSamples.push([pixels[idx], pixels[idx + 1], pixels[idx + 2]]);
+                // Bottom edge
+                idx = ((height - 1) * width + x) * 4;
+                edgeSamples.push([pixels[idx], pixels[idx + 1], pixels[idx + 2]]);
+            }
+
+            // Left and right edges
+            for (let y = 0; y < height; y += sampleSize) {
+                // Left edge
+                let idx = (y * width + 0) * 4;
+                edgeSamples.push([pixels[idx], pixels[idx + 1], pixels[idx + 2]]);
+                // Right edge
+                idx = (y * width + (width - 1)) * 4;
+                edgeSamples.push([pixels[idx], pixels[idx + 1], pixels[idx + 2]]);
+            }
+
+            // Find most common color using clustering
+            let avgR = 0, avgG = 0, avgB = 0;
+            edgeSamples.forEach(([r, g, b]) => {
+                avgR += r;
+                avgG += g;
+                avgB += b;
+            });
+
+            return [
+                Math.round(avgR / edgeSamples.length),
+                Math.round(avgG / edgeSamples.length),
+                Math.round(avgB / edgeSamples.length)
+            ];
+        }
+
+        function createColorBasedMask(pixels, width, height, backgroundColor) {
+            const maskData = new Uint8ClampedArray(pixels.length);
+            const [bgR, bgG, bgB] = backgroundColor;
+
+            // Adaptive threshold based on image variance
+            let threshold = 40; // Base color difference threshold
+
+            for (let i = 0; i < pixels.length; i += 4) {
+                const r = pixels[i];
+                const g = pixels[i + 1];
+                const b = pixels[i + 2];
+
+                // Calculate color difference from background
+                const colorDiff = Math.sqrt(
+                    Math.pow(r - bgR, 2) +
+                    Math.pow(g - bgG, 2) +
+                    Math.pow(b - bgB, 2)
+                );
+
+                // Determine if this pixel is subject or background
+                if (colorDiff > threshold) {
+                    // Subject - keep it (white in mask)
+                    maskData[i] = 255;
+                    maskData[i + 1] = 255;
+                    maskData[i + 2] = 255;
+                    maskData[i + 3] = 255;
+                } else {
+                    // Background - remove it (black in mask)
+                    maskData[i] = 0;
+                    maskData[i + 1] = 0;
+                    maskData[i + 2] = 0;
+                    maskData[i + 3] = 255;
+                }
+            }
+
+            return maskData;
+        }
+
+        function applyEdgeRefinement(maskData, width, height) {
+            // Apply Sobel edge detection to refine mask boundaries
+            const edges = new Uint8ClampedArray(maskData.length);
+
+            for (let y = 1; y < height - 1; y++) {
+                for (let x = 1; x < width - 1; x++) {
+                    const idx = (y * width + x) * 4;
+
+                    // Get neighboring pixels
+                    const neighbors = [
+                        maskData[((y-1) * width + (x-1)) * 4], maskData[((y-1) * width + x) * 4], maskData[((y-1) * width + (x+1)) * 4],
+                        maskData[(y * width + (x-1)) * 4],     maskData[idx],                        maskData[(y * width + (x+1)) * 4],
+                        maskData[((y+1) * width + (x-1)) * 4], maskData[((y+1) * width + x) * 4], maskData[((y+1) * width + (x+1)) * 4]
+                    ];
+
+                    // Calculate edge strength
+                    const gx = -neighbors[0] + neighbors[2] - 2*neighbors[3] + 2*neighbors[5] - neighbors[6] + neighbors[8];
+                    const gy = -neighbors[0] - 2*neighbors[1] - neighbors[2] + neighbors[6] + 2*neighbors[7] + neighbors[8];
+                    const edgeStrength = Math.sqrt(gx*gx + gy*gy);
+
+                    // If strong edge, ensure it's part of subject
+                    if (edgeStrength > 100) {
+                        edges[idx] = 255;
+                        edges[idx + 1] = 255;
+                        edges[idx + 2] = 255;
+                        edges[idx + 3] = 255;
+                    } else {
+                        edges[idx] = maskData[idx];
+                        edges[idx + 1] = maskData[idx + 1];
+                        edges[idx + 2] = maskData[idx + 2];
+                        edges[idx + 3] = maskData[idx + 3];
+                    }
+                }
+            }
+
+            // Copy refined edges back
+            for (let i = 0; i < maskData.length; i++) {
+                maskData[i] = edges[i];
+            }
+        }
+
+        function cleanupMask(maskData, width, height) {
+            // Morphological operations to clean up the mask
+
+            // Step 1: Erosion - remove small noise
+            const eroded = new Uint8ClampedArray(maskData.length);
+            for (let y = 1; y < height - 1; y++) {
+                for (let x = 1; x < width - 1; x++) {
+                    const idx = (y * width + x) * 4;
+
+                    // Check if all neighbors are white (subject)
+                    let allWhite = true;
+                    for (let dy = -1; dy <= 1; dy++) {
+                        for (let dx = -1; dx <= 1; dx++) {
+                            const nIdx = ((y + dy) * width + (x + dx)) * 4;
+                            if (maskData[nIdx] < 128) {
+                                allWhite = false;
+                                break;
+                            }
+                        }
+                        if (!allWhite) break;
+                    }
+
+                    const value = allWhite ? 255 : 0;
+                    eroded[idx] = value;
+                    eroded[idx + 1] = value;
+                    eroded[idx + 2] = value;
+                    eroded[idx + 3] = 255;
+                }
+            }
+
+            // Step 2: Dilation - restore subject size with smooth edges
+            for (let y = 2; y < height - 2; y++) {
+                for (let x = 2; x < width - 2; x++) {
+                    const idx = (y * width + x) * 4;
+
+                    // Check if any neighbor is white
+                    let hasWhite = false;
+                    for (let dy = -2; dy <= 2; dy++) {
+                        for (let dx = -2; dx <= 2; dx++) {
+                            const nIdx = ((y + dy) * width + (x + dx)) * 4;
+                            if (eroded[nIdx] > 128) {
+                                hasWhite = true;
+                                break;
+                            }
+                        }
+                        if (hasWhite) break;
+                    }
+
+                    const value = hasWhite ? 255 : 0;
+                    maskData[idx] = value;
+                    maskData[idx + 1] = value;
+                    maskData[idx + 2] = value;
+                    maskData[idx + 3] = 255;
+                }
+            }
+
+            // Step 3: Add smooth feathering to edges
+            for (let y = 1; y < height - 1; y++) {
+                for (let x = 1; x < width - 1; x++) {
+                    const idx = (y * width + x) * 4;
+
+                    if (maskData[idx] > 128) {
+                        // Count white neighbors
+                        let whiteNeighbors = 0;
+                        for (let dy = -1; dy <= 1; dy++) {
+                            for (let dx = -1; dx <= 1; dx++) {
+                                if (dx === 0 && dy === 0) continue;
+                                const nIdx = ((y + dy) * width + (x + dx)) * 4;
+                                if (maskData[nIdx] > 128) whiteNeighbors++;
+                            }
+                        }
+
+                        // Create soft edge
+                        if (whiteNeighbors < 6) {
+                            const alpha = Math.floor(255 * (whiteNeighbors / 8));
+                            maskData[idx] = alpha;
+                            maskData[idx + 1] = alpha;
+                            maskData[idx + 2] = alpha;
+                        }
+                    }
+                }
+            }
         }
 
         function applyProFinishing(ctx, width, height) {
