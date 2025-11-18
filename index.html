@@ -596,7 +596,7 @@
 
             <div class="quick-info">
                 <div class="quick-info-text">
-                    🎯 100% Automatic • 🤖 Real AI Background Removal • 📝 Instant Captions • 💾 All Formats
+                    🎯 100% Automatic • 🤖 Real AI Background Removal • 🎨 Contextual Props • 💡 Pro Lighting • 🏷️ Logo Overlay • 📝 Viral Captions • 💾 All Formats
                 </div>
             </div>
 
@@ -940,18 +940,158 @@
             // Step 1: Generate stunning background based on detected type
             generateStunningBackground(ctx, width, height);
 
-            // Step 2: ADVANCED subject extraction with edge detection
+            // Step 2: Add contextual props/surfaces (plates, tables, etc.)
+            addContextualProps(ctx, width, height);
+
+            // Step 3: ADVANCED subject extraction with edge detection
             createAdvancedMask(ctx, width, height);
 
-            // Step 3: Professional-grade finishing
+            // Step 4: Professional lighting effects
+            applyProfessionalLighting(ctx, width, height);
+
+            // Step 5: Professional-grade finishing
             applyProFinishing(ctx, width, height);
 
-            // Step 4: Add logo overlay if user uploaded one
+            // Step 6: Add logo overlay if user uploaded one
             if (userLogo) {
                 applyLogoOverlay(ctx, width, height);
             }
 
             enhancedImage = canvas;
+        }
+
+        function addContextualProps(ctx, width, height) {
+            // Add industry-specific props and surfaces
+            ctx.save();
+
+            if (detectedIndustry === 'restaurant') {
+                // Add elegant table surface for food
+                const tableGradient = ctx.createLinearGradient(0, height * 0.7, 0, height);
+                tableGradient.addColorStop(0, 'rgba(40, 30, 25, 0)');
+                tableGradient.addColorStop(0.3, 'rgba(40, 30, 25, 0.4)');
+                tableGradient.addColorStop(1, 'rgba(20, 15, 12, 0.8)');
+                ctx.fillStyle = tableGradient;
+                ctx.fillRect(0, height * 0.7, width, height * 0.3);
+
+                // Add subtle wood grain texture
+                ctx.globalAlpha = 0.15;
+                for (let i = 0; i < 50; i++) {
+                    const y = height * 0.7 + Math.random() * (height * 0.3);
+                    ctx.strokeStyle = Math.random() > 0.5 ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)';
+                    ctx.lineWidth = Math.random() * 2;
+                    ctx.beginPath();
+                    ctx.moveTo(0, y);
+                    ctx.lineTo(width, y + (Math.random() - 0.5) * 5);
+                    ctx.stroke();
+                }
+                ctx.globalAlpha = 1;
+
+                // Add plate shadow suggestion
+                const centerX = width / 2;
+                const centerY = height * 0.85;
+                const shadowGradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, width * 0.35);
+                shadowGradient.addColorStop(0, 'rgba(0, 0, 0, 0.3)');
+                shadowGradient.addColorStop(0.7, 'rgba(0, 0, 0, 0.1)');
+                shadowGradient.addColorStop(1, 'transparent');
+                ctx.fillStyle = shadowGradient;
+                ctx.fillRect(0, 0, width, height);
+
+            } else if (detectedIndustry === 'gym') {
+                // Add floor/surface for gym equipment
+                const floorGradient = ctx.createLinearGradient(0, height * 0.6, 0, height);
+                floorGradient.addColorStop(0, 'rgba(15, 15, 30, 0)');
+                floorGradient.addColorStop(0.4, 'rgba(15, 15, 30, 0.5)');
+                floorGradient.addColorStop(1, 'rgba(10, 10, 20, 0.9)');
+                ctx.fillStyle = floorGradient;
+                ctx.fillRect(0, height * 0.6, width, height * 0.4);
+
+                // Add reflection effect
+                ctx.globalAlpha = 0.1;
+                const reflectionGradient = ctx.createLinearGradient(0, height * 0.75, 0, height);
+                reflectionGradient.addColorStop(0, 'rgba(255, 255, 255, 0.3)');
+                reflectionGradient.addColorStop(1, 'transparent');
+                ctx.fillStyle = reflectionGradient;
+                ctx.fillRect(0, height * 0.75, width, height * 0.25);
+                ctx.globalAlpha = 1;
+
+            } else if (detectedIndustry === 'retail') {
+                // Add display surface for products
+                const surfaceGradient = ctx.createLinearGradient(0, height * 0.65, 0, height);
+                surfaceGradient.addColorStop(0, 'rgba(220, 220, 220, 0)');
+                surfaceGradient.addColorStop(0.3, 'rgba(200, 200, 200, 0.4)');
+                surfaceGradient.addColorStop(1, 'rgba(180, 180, 180, 0.7)');
+                ctx.fillStyle = surfaceGradient;
+                ctx.fillRect(0, height * 0.65, width, height * 0.35);
+
+                // Add subtle reflection
+                ctx.globalAlpha = 0.15;
+                const reflection = ctx.createLinearGradient(0, height * 0.7, 0, height);
+                reflection.addColorStop(0, 'rgba(255, 255, 255, 0.5)');
+                reflection.addColorStop(1, 'transparent');
+                ctx.fillStyle = reflection;
+                ctx.fillRect(0, height * 0.7, width, height * 0.3);
+                ctx.globalAlpha = 1;
+            }
+
+            ctx.restore();
+        }
+
+        function applyProfessionalLighting(ctx, width, height) {
+            // Add professional studio lighting effects
+            ctx.save();
+
+            if (detectedIndustry === 'restaurant') {
+                // Warm top light for food
+                const topLight = ctx.createRadialGradient(width * 0.5, height * 0.2, 0, width * 0.5, height * 0.2, width * 0.8);
+                topLight.addColorStop(0, 'rgba(255, 240, 220, 0.15)');
+                topLight.addColorStop(0.5, 'rgba(255, 240, 220, 0.05)');
+                topLight.addColorStop(1, 'transparent');
+                ctx.fillStyle = topLight;
+                ctx.fillRect(0, 0, width, height);
+
+                // Rim light from side
+                const rimLight = ctx.createLinearGradient(0, 0, width, 0);
+                rimLight.addColorStop(0, 'rgba(255, 200, 100, 0.1)');
+                rimLight.addColorStop(0.3, 'transparent');
+                rimLight.addColorStop(0.7, 'transparent');
+                rimLight.addColorStop(1, 'rgba(255, 200, 100, 0.1)');
+                ctx.fillStyle = rimLight;
+                ctx.fillRect(0, 0, width, height * 0.6);
+
+            } else if (detectedIndustry === 'gym') {
+                // Dramatic side lighting for gym
+                const sideLight = ctx.createLinearGradient(0, 0, width, 0);
+                sideLight.addColorStop(0, 'rgba(233, 69, 96, 0.15)');
+                sideLight.addColorStop(0.5, 'transparent');
+                sideLight.addColorStop(1, 'rgba(0, 217, 255, 0.15)');
+                ctx.fillStyle = sideLight;
+                ctx.fillRect(0, 0, width, height);
+
+                // Top highlight
+                const topHighlight = ctx.createRadialGradient(width * 0.5, height * 0.3, 0, width * 0.5, height * 0.3, width * 0.6);
+                topHighlight.addColorStop(0, 'rgba(255, 255, 255, 0.1)');
+                topHighlight.addColorStop(1, 'transparent');
+                ctx.fillStyle = topHighlight;
+                ctx.fillRect(0, 0, width, height);
+
+            } else {
+                // Clean studio lighting for products
+                const mainLight = ctx.createRadialGradient(width * 0.3, height * 0.2, 0, width * 0.3, height * 0.2, width * 0.9);
+                mainLight.addColorStop(0, 'rgba(255, 255, 255, 0.2)');
+                mainLight.addColorStop(0.6, 'rgba(255, 255, 255, 0.05)');
+                mainLight.addColorStop(1, 'transparent');
+                ctx.fillStyle = mainLight;
+                ctx.fillRect(0, 0, width, height);
+
+                // Fill light from opposite side
+                const fillLight = ctx.createRadialGradient(width * 0.7, height * 0.4, 0, width * 0.7, height * 0.4, width * 0.6);
+                fillLight.addColorStop(0, 'rgba(255, 255, 255, 0.1)');
+                fillLight.addColorStop(1, 'transparent');
+                ctx.fillStyle = fillLight;
+                ctx.fillRect(0, 0, width, height);
+            }
+
+            ctx.restore();
         }
 
         function applyLogoOverlay(ctx, width, height) {
@@ -1405,10 +1545,13 @@
             const insights = [
                 `✅ ${detectedType} automatically detected using AI`,
                 '✅ Background professionally removed with edge detection',
-                '✅ Stunning contextual background generated',
+                `✅ Industry-specific ${detectedIndustry} background generated`,
+                '✅ Contextual props added (surfaces, shadows, reflections)',
+                '✅ Professional studio lighting applied',
                 '✅ Colors enhanced for maximum impact',
-                '✅ Professional finishing applied',
-                '💡 Ready to post on all social media platforms'
+                '✅ Premium finishing with vignettes and highlights',
+                userLogo ? '✅ Your logo professionally positioned' : '💡 Tip: Add your logo for branding',
+                '🎉 Ready to post on all social media platforms'
             ];
 
             const container = document.getElementById('insightsContainer');
